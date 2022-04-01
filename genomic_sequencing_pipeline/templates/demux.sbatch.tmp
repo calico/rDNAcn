@@ -1,0 +1,22 @@
+#!/bin/bash
+#SBATCH -p standard
+#SBATCH --job-name=dmux      # job name
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=4
+#SBATCH --mem-per-cpu 32000
+#SBATCH -t 0-24:00               # time (D-HH:MM)
+#SBATCH -o {working_dir}/dmux.out            # STDOUT
+#SBATCH -e {working_dir}/dmux.err            # STDERR
+#notification options
+#SBATCH --mail-type=all
+#SBATCH --mail-user={email}
+
+module load bcl2fastq2/2.20.0.422
+
+dir={bcl_dir}
+ssheet={sample_sheet}
+
+cd {working_dir};
+bcl2fastq -R $dir -o fastqs \
+    --sample-sheet $ssheet --no-lane-splitting --use-bases-mask \
+    Y{read_length},I{index_read_length},I{index_read_length},Y{read_length};

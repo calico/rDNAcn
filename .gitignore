@@ -1,0 +1,4 @@
+*.pyc
+.DS_STORE
+ICON?
+*-checkpoint.ipynb

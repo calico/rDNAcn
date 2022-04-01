@@ -1,0 +1,58 @@
+#!/bin/bash
+#SBATCH -p standard
+#SBATCH --job-name=align      # job name
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task={nthread}
+#SBATCH --mem-per-cpu 8000
+#SBATCH -t 0-24:00               # time (D-HH:MM)
+#SBATCH -o {wd}/job_output/align_%a.out
+#SBATCH -e {wd}/job_output/align_%a.err
+#notification options
+#SBATCH --mail-type=all
+#SBATCH --mail-user={email}
+#SBATCH --array=1-{n_samples}%20
+
+TASKFILE={filename_file}
+TASKNUM=$SLURM_ARRAY_TASK_ID
+
+FASTQ_F_FILE=$(cat ${{TASKFILE}} | head -n ${{TASKNUM}} | tail -1 | cut -f 1)
+FASTQ_R_FILE=$(cat ${{TASKFILE}} | head -n ${{TASKNUM}} | tail -1 | cut -f 2)
+TRIMMED_FASTQ_F_FILE=$(cat ${{TASKFILE}} | head -n ${{TASKNUM}} | tail -1 | cut -f 3)
+TRIMMED_FASTQ_R_FILE=$(cat ${{TASKFILE}} | head -n ${{TASKNUM}} | tail -1 | cut -f 4)
+SINGLE_FILE=$(cat ${{TASKFILE}} | head -n ${{TASKNUM}} | tail -1 | cut -f 5)
+BAM_FILE=$(cat ${{TASKFILE}} | head -n ${{TASKNUM}} | tail -1 | cut -f 6)
+SORTED_BAM_FILE=$(cat ${{TASKFILE}} | head -n ${{TASKNUM}} | tail -1 | cut -f 7)
+DEPTH_FILE=$(cat ${{TASKFILE}} | head -n ${{TASKNUM}} | tail -1 | cut -f 8)
+
+rm -f $TRIMMED_FASTQ_F_FILE;
+rm -f $TRIMMED_FASTQ_R_FILE;
+rm -f $SINGLE_FILE;
+rm -f $BAM_FILE;
+rm -f $SORTED_BAM_FILE;
+rm -f $DEPTH_FILE;
+
+## PATH TO COMPILED TOOLS FOR CLUSTER AND VMs
+export PATH=$PATH:/home/bin;
+
+
+echo "Will start trimming...";
+sickle pe -t sanger -x \
+    -f $FASTQ_F_FILE -r $FASTQ_R_FILE \
+    -o $TRIMMED_FASTQ_F_FILE -p $TRIMMED_FASTQ_R_FILE \
+    -s $SINGLE_FILE;
+echo "Completed trimming!";
+echo "Will start aligning...";
+bowtie2 -p {nthread} -x {ref_location} \
+    -1 $TRIMMED_FASTQ_F_FILE -2 $TRIMMED_FASTQ_R_FILE \
+    | samtools view -bS -@ {nthread} - > $BAM_FILE;
+echo "Completed aligning!";
+echo "Will start sorting...";
+samtools sort -@ {nthread} $BAM_FILE -o $SORTED_BAM_FILE;
+echo "Completed sorting!";
+echo "Will start indexing...";
+samtools index -@ {nthread} $SORTED_BAM_FILE;
+echo "Completed indexing!";
+echo "Will start counting...";
+samtools depth -a -d1000000 $SORTED_BAM_FILE > $DEPTH_FILE;
+samtools view -c -F 4 $BAM_FILE > $BAM_FILE.count;
+echo "Completed counting!";

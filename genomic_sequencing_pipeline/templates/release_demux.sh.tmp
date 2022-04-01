@@ -1,0 +1,9 @@
+#!/bin/bash
+SEQUENCING_COMPETE_FILE={bcl_dir}/SequencingComplete.txt
+ls $SEQUENCING_COMPETE_FILE
+while [ $? -eq 2 ]
+do
+  sleep 60
+  ls SEQUENCING_COMPETE_FILE
+done
+scontrol release {slurm_job_id_demux}
