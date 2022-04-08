@@ -10,8 +10,9 @@ This repo is to organize and maintain the code/files associated with the rDNA CN
 
 
 If you find any of this code/analysis useful in your own work, please cite the manuscript as:
-```
-Add citation here...
-```
+
+  > Hotz M, Thayer NH, Hendrickson DG, Schinski EL, Xu J and Gottschling DE. (2022) **rDNA array length is a major determinant of replicative lifespan in budding yeast** _PNAS_ 119 (15) e2119593119
+[https://doi.org/10.1073/pnas.2119593119](https://doi.org/10.1073/pnas.2119593119)
+
 
 ![rDNA copy number model](data/model%20large.png)
