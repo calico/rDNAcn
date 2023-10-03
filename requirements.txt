@@ -19,7 +19,7 @@ openpyxl==3.0.9
 packaging==21.3
 pandas==1.4.1
 patsy==0.5.2
-Pillow==9.0.1
+Pillow==10.0.1
 pyparsing==3.0.7
 python-dateutil==2.8.2
 pytz==2021.3
